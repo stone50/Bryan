@@ -489,38 +489,54 @@ void Position::printBoard() {
 
 #pragma region helper functions
 
-
+// sets squares which are attacked by the enemy king
 void Position::kingAttack(
 	unsigned char row,
 	unsigned char col,
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
+	// attack square up
 	if (row >= 1) {
 		kingDangerSquares->insert(((row - 1) * 8) + col);
 	}
+
+	// attack square down
 	if (row <= 6) {
 		kingDangerSquares->insert(((row + 1) * 8) + col);
 	}
+
+	// attack square right
 	if (col <= 6) {
 		kingDangerSquares->insert((row * 8) + col + 1);
 	}
+
+	// attack square left
 	if (col >= 1) {
 		kingDangerSquares->insert((row * 8) + col - 1);
 	}
+
+	// attack square up and right
 	if (row >= 1 && col <= 6) {
 		kingDangerSquares->insert(((row - 1) * 8) + col + 1);
 	}
+
+	// attack square up and left
 	if (row >= 1 && col >= 1) {
 		kingDangerSquares->insert(((row - 1) * 8) + col - 1);
 	}
+
+	// attack square down and right
 	if (row <= 6 && col <= 6) {
 		kingDangerSquares->insert(((row + 1) * 8) + col + 1);
 	}
+
+	// attack square down and left
 	if (row <= 6 && col >= 1) {
 		kingDangerSquares->insert(((row + 1) * 8) + col - 1);
 	}
 }
 
+// sets squares which are attacked by the enemy bishops
 void Position::bishopAttack(
 	unsigned char row,
 	unsigned char col,
@@ -530,6 +546,8 @@ void Position::bishopAttack(
 	unordered_set<unsigned char>* pinnedPieces
 ) {
 	unsigned char pin = 64;
+
+	// attack squares up and left
 	for (unsigned char topLeft = 1; row - topLeft >= 0 && col - topLeft >= 0; topLeft++) {
 		if (sliderAttack(
 			row,
@@ -546,6 +564,8 @@ void Position::bishopAttack(
 		}
 	}
 	pin = 64;
+
+	// attack squares up and right
 	for (unsigned char topRight = 1; row - topRight >= 0 && col + topRight < 8; topRight++) {
 		if (sliderAttack(
 			row,
@@ -562,6 +582,8 @@ void Position::bishopAttack(
 		}
 	}
 	pin = 64;
+
+	//attack squares down and left
 	for (unsigned char bottomLeft = 1; row + bottomLeft < 8 && col - bottomLeft >= 0; bottomLeft++) {
 		if (sliderAttack(
 			row,
@@ -578,6 +600,8 @@ void Position::bishopAttack(
 		}
 	}
 	pin = 64;
+
+	// attack squares down and right
 	for (unsigned char bottomRight = 1; row + bottomRight < 8 && col + bottomRight < 8; bottomRight++) {
 		if (sliderAttack(
 			row,
@@ -595,6 +619,7 @@ void Position::bishopAttack(
 	}
 }
 
+// sets squares which are attacked by the enemy knights
 void Position::knightAttack(
 	unsigned char row,
 	unsigned char col,
@@ -602,6 +627,8 @@ void Position::knightAttack(
 	bool* doubleCheck,
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
+
+	// attack square up 2 and left 1
 	if (row >= 2 && col >= 1) {
 		nonSliderAttack(
 			row,
@@ -613,6 +640,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square up 2 and right 1
 	if (row >= 2 && col <= 6) {
 		nonSliderAttack(
 			row,
@@ -624,6 +653,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square up 1 and right 2
 	if (row >= 1 && col <= 5) {
 		nonSliderAttack(
 			row,
@@ -635,6 +666,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square down 1 and right 2
 	if (row <= 6 && col <= 5) {
 		nonSliderAttack(
 			row,
@@ -646,6 +679,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square down 2 and right 1
 	if (row <= 5 && col <= 6) {
 		nonSliderAttack(
 			row,
@@ -657,6 +692,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square down 2 and left 1
 	if (row <= 5 && col >= 1) {
 		nonSliderAttack(
 			row,
@@ -668,6 +705,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square down 1 and left 2
 	if (row <= 6 && col >= 2) {
 		nonSliderAttack(
 			row,
@@ -679,6 +718,8 @@ void Position::knightAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack square up 1 and left 2
 	if (row >= 1 && col >= 2) {
 		nonSliderAttack(
 			row,
@@ -692,6 +733,7 @@ void Position::knightAttack(
 	}
 }
 
+// sets squares which are attacked by the enemy rooks
 void Position::rookAttack(
 	unsigned char row,
 	unsigned char col,
@@ -701,6 +743,8 @@ void Position::rookAttack(
 	unordered_set<unsigned char>* pinnedPieces
 ) {
 	unsigned char pin = 64;
+
+	// attack up
 	for (unsigned char top = 1; row - top >= 0; top++) {
 		if (sliderAttack(
 			row,
@@ -717,6 +761,8 @@ void Position::rookAttack(
 		}
 	}
 	pin = 64;
+
+	//attack down
 	for (unsigned char bottom = 1; row + bottom < 8; bottom++) {
 		if (sliderAttack(
 			row,
@@ -733,6 +779,8 @@ void Position::rookAttack(
 		}
 	}
 	pin = 64;
+
+	//attack right
 	for (unsigned char right = 1; col + right < 8; right++) {
 		if (sliderAttack(
 			row,
@@ -749,6 +797,8 @@ void Position::rookAttack(
 		}
 	}
 	pin = 64;
+
+	// attack left
 	for (unsigned char left = 1; col - left >= 0; left++) {
 		if (sliderAttack(
 			row,
@@ -766,6 +816,7 @@ void Position::rookAttack(
 	}
 }
 
+// sets squares which are attacked by the enemy pawns
 void Position::pawnAttack(
 	unsigned char row,
 	unsigned char col,
@@ -774,6 +825,8 @@ void Position::pawnAttack(
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
 	signed char direction = ((islower(board[row][col]) > 0) * 2) - 1;
+
+	// attack right
 	if (col <= 6) {
 		nonSliderAttack(
 			row,
@@ -785,19 +838,23 @@ void Position::pawnAttack(
 			kingDangerSquares
 		);
 	}
+
+	// attack left
 	if (col >= 1) {
 		nonSliderAttack(
-row,
-col,
-row + direction,
-col - 1,
-check,
-doubleCheck,
-kingDangerSquares
-);
+			row,
+			col,
+			row + direction,
+			col - 1,
+			check,
+			doubleCheck,
+			kingDangerSquares
+		);
 	}
 }
 
+// sets squares which are attacked by enemy 'sliders' (queens, bishops, and rooks)
+// returns true when a piece should stop attacking in the current direction
 bool Position::sliderAttack(
 	unsigned char pieceRow,
 	unsigned char pieceCol,
@@ -810,6 +867,8 @@ bool Position::sliderAttack(
 	unordered_set<unsigned char>* pinnedPieces
 ) {
 	char square = board[attackRow][attackCol];
+
+	// if the pin variable is set and the attacked square is the enemy king then the piece on the pin square is pinned
 	if (*pin < 64) {
 		if (square == (whiteMove ? 'K' : 'k')) {
 			pinnedPieces->insert(*pin);
@@ -818,10 +877,10 @@ bool Position::sliderAttack(
 		else if (square != '-') {
 			return true;
 		}
-		else {
-			return false;
-		}
+		return false;
 	}
+
+	// if the attacked piece is an enemy then check for a pin
 	else {
 		if (square == '-') {
 			kingDangerSquares->insert((attackRow * 8) + attackCol);
@@ -830,13 +889,12 @@ bool Position::sliderAttack(
 		else if (square == (whiteMove ? 'K' : 'k')) {
 			if (*check < 64) {
 				*doubleCheck = true;
-				return false;
 			}
 			else {
 				*check = (pieceRow * 8) + pieceCol;
 				kingDangerSquares->insert((attackRow * 8) + attackCol);
-				return false;
 			}
+			return false;
 		}
 		else {
 			if (whiteMove ? islower(square) : isupper(square)) {
@@ -851,6 +909,7 @@ bool Position::sliderAttack(
 	}
 }
 
+// sets squares which are attacked by enemy 'non-sliders' (kings, knights, and pawns)
 void Position::nonSliderAttack(
 	unsigned char pieceRow,
 	unsigned char pieceCol,
@@ -874,6 +933,8 @@ void Position::nonSliderAttack(
 	}
 }
 
+// generates a string that represents a move and adds it to the moves vector
+// returns false if a pinned piece cannot move to the given square
 bool Position::generateMove(
 	unsigned char startRow,
 	unsigned char startCol,
@@ -886,6 +947,8 @@ bool Position::generateMove(
 	char promote,
 	bool ep
 ) {
+
+	// if a piece is pinned then it should only be able to move in a straight line towards or away from the king
 	if (pinnedPieces->count((startRow * 8) + startCol)) {
 		signed char startRowDist = startRow - kingRow;
 		signed char startColDist = startCol - kingCol;
@@ -911,6 +974,7 @@ bool Position::generateMove(
 	return true;
 }
 
+// generates moves for bishops
 void Position::generateBishopMoves(
 	unsigned char row,
 	unsigned char col,
@@ -919,6 +983,8 @@ void Position::generateBishopMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
+
+	// search squares up and left
 	for (unsigned char topLeft = 1; row - topLeft >= 0 && col - topLeft >= 0; topLeft++) {
 		char square = board[row - topLeft][col - topLeft];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -939,6 +1005,8 @@ void Position::generateBishopMoves(
 			break;
 		}
 	}
+
+	// search squares up and right
 	for (unsigned char topRight = 1; row - topRight >= 0 && col + topRight < 8; topRight++) {
 		char square = board[row - topRight][col + topRight];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -959,6 +1027,8 @@ void Position::generateBishopMoves(
 			break;
 		}
 	}
+
+	// search squares down and left
 	for (unsigned char bottomLeft = 1; row + bottomLeft < 8 && col - bottomLeft >= 0; bottomLeft++) {
 		char square = board[row + bottomLeft][col - bottomLeft];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -979,6 +1049,8 @@ void Position::generateBishopMoves(
 			break;
 		}
 	}
+
+	//search squares down and right
 	for (unsigned char bottomRight = 1; row + bottomRight < 8 && col + bottomRight < 8; bottomRight++) {
 		char square = board[row + bottomRight][col + bottomRight];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -1001,6 +1073,7 @@ void Position::generateBishopMoves(
 	}
 }
 
+// generates moves for knights
 void Position::generateKnightMoves(
 	unsigned char row,
 	unsigned char col,
@@ -1009,6 +1082,8 @@ void Position::generateKnightMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
+
+	// check square up 2 and left 1
 	if (
 		row >= 2 &&
 		col >= 1 &&
@@ -1025,6 +1100,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square up 2 and right 1
 	if (
 		row >= 2 &&
 		col <= 6 &&
@@ -1041,6 +1118,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square up 1 and right 2
 	if (
 		row >= 1 &&
 		col <= 5 &&
@@ -1057,6 +1136,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square down 1 and right 2
 	if (
 		row <= 6 &&
 		col <= 5 &&
@@ -1073,6 +1154,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square down 2 and right 1
 	if (
 		row <= 5 &&
 		col <= 6 &&
@@ -1089,6 +1172,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square down 2 and left 1
 	if (
 		row <= 5 &&
 		col >= 1 &&
@@ -1105,6 +1190,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square down 1 and left 2
 	if (
 		row <= 6 &&
 		col >= 2 &&
@@ -1121,6 +1208,8 @@ void Position::generateKnightMoves(
 			kingCol
 		);
 	}
+
+	// check square up 1 and left 2
 	if (
 		row >= 1 &&
 		col >= 2 &&
@@ -1139,6 +1228,7 @@ void Position::generateKnightMoves(
 	}
 }
 
+// generates moves for rooks
 void Position::generateRookMoves(
 	unsigned char row,
 	unsigned char col,
@@ -1147,6 +1237,8 @@ void Position::generateRookMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
+
+	// search squares above
 	for (unsigned char top = 1; row - top >= 0; top++) {
 		char square = board[row - top][col];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -1167,6 +1259,8 @@ void Position::generateRookMoves(
 			break;
 		}
 	}
+
+	// search squares below
 	for (unsigned char bottom = 1; row + bottom < 8; bottom++) {
 		char square = board[row + bottom][col];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -1187,6 +1281,8 @@ void Position::generateRookMoves(
 			break;
 		}
 	}
+
+	// search squares to the right
 	for (unsigned char right = 1; col + right < 8; right++) {
 		char square = board[row][col + right];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -1207,6 +1303,8 @@ void Position::generateRookMoves(
 			break;
 		}
 	}
+
+	// search squares to the left
 	for (unsigned char left = 1; col - left >= 0; left++) {
 		char square = board[row][col - left];
 		if (!(whiteMove ? isupper(square) : islower(square))) {
@@ -1229,6 +1327,7 @@ void Position::generateRookMoves(
 	}
 }
 
+// generates moves for pawns
 void Position::generatePawnMoves(
 	unsigned char row,
 	unsigned char col,
@@ -1238,48 +1337,205 @@ void Position::generatePawnMoves(
 	unsigned char kingCol
 ) {
 	signed char direction = ((islower(board[row][col]) > 0) * 2) - 1;
+
+	// capture right
 	if (
 		col <= 6 &&
 		(whiteMove ? islower(board[row + direction][col + 1]) : isupper(board[row + direction][col + 1]))
 		) {
-		generateMove(
-			row,
-			col,
-			row + direction,
-			col + 1,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
+		// promotion
+		if (row + direction == (whiteMove ? 1 : 6)) {
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col + 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'Q' : 'q'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col + 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'B' : 'b'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col + 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'N' : 'n'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col + 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'R' : 'r'
+			);
+		}
+		else {
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col + 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+		}
 	}
+
+	// capture left
 	if (
 		col >= 1 &&
 		(whiteMove ? islower(board[row + direction][col - 1]) : isupper(board[row + direction][col - 1]))
 		) {
-		generateMove(
-			row,
-			col,
-			row + direction,
-			col - 1,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
+
+		// promotion
+		if (row + direction == (whiteMove ? 1 : 6)) {
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col - 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'Q' : 'q'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col - 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'B' : 'b'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col - 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'N' : 'n'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col - 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'R' : 'r'
+			);
+		}
+		else {
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col - 1,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+		}
 	}
+
+	// normal forward move
 	if (board[row + direction][col] == '-') {
-		generateMove(
-			row,
-			col,
-			row + direction,
-			col,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
+
+		// promotion
+		if (row + direction == (whiteMove ? 1 : 6)) {
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'Q' : 'q'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'B' : 'b'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'N' : 'n'
+			);
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol,
+				whiteMove ? 'R' : 'r'
+			);
+		}
+		else {
+			generateMove(
+				row,
+				col,
+				row + direction,
+				col,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+		}
 	}
+
+	// move 2 squares on first move
 	if (
 		row == (whiteMove ? 6 : 1) &&
 		board[row + direction][col] == '-' &&
@@ -1296,6 +1552,8 @@ void Position::generatePawnMoves(
 			kingCol
 		);
 	}
+
+	// en passant
 	if (ep != "-") {
 		signed char epSquare = ((56 - ep.at(1)) * 8) + (ep.at(0) - 97);
 		unsigned char epRow = 56 - ep.at(1);

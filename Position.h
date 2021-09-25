@@ -56,12 +56,14 @@ private:
 
 #pragma region helper functions
 
+	// sets squares which are attacked by the enemy king
 	void kingAttack(
 		unsigned char row,
 		unsigned char col,
 		unordered_set<unsigned char>* kingDangerSquares
 	);
 
+	// sets squares which are attacked by the enemy bishops
 	void bishopAttack(
 		unsigned char row,
 		unsigned char col,
@@ -71,6 +73,7 @@ private:
 		unordered_set<unsigned char>* pinnedPieces
 	);
 
+	// sets squares which are attacked by the enemy knights
 	void knightAttack(
 		unsigned char row,
 		unsigned char col,
@@ -79,6 +82,7 @@ private:
 		unordered_set<unsigned char>* kingDangerSquares
 	);
 
+	// sets squares which are attacked by the enemy rooks
 	void rookAttack(
 		unsigned char row,
 		unsigned char col,
@@ -88,6 +92,7 @@ private:
 		unordered_set<unsigned char>* pinnedPieces
 	);
 	
+	// sets squares which are attacked by the enemy pawns
 	void pawnAttack(
 		unsigned char row,
 		unsigned char col,
@@ -96,6 +101,8 @@ private:
 		unordered_set<unsigned char>* kingDangerSquares
 	);
 
+	// sets squares which are attacked by enemy 'sliders' (queens, bishops, and rooks)
+	// returns true when a piece should stop attacking in the current direction
 	bool sliderAttack(
 		unsigned char pieceRow,
 		unsigned char pieceCol,
@@ -108,6 +115,7 @@ private:
 		unordered_set<unsigned char>* pinnedPieces
 	);
 
+	// sets squares which are attacked by enemy 'non-sliders' (kings, knights, and pawns)
 	void nonSliderAttack(
 		unsigned char pieceRow,
 		unsigned char pieceCol,
@@ -118,6 +126,8 @@ private:
 		unordered_set<unsigned char>* kingDangerSquares
 	);
 
+	// generates a string that represents a move and adds it to the moves vector
+	// returns false if a pinned piece cannot move to the given square
 	bool generateMove(
 		unsigned char startRow,
 		unsigned char startCol,
@@ -131,6 +141,7 @@ private:
 		bool ep = false
 	);
 
+	// generates moves for bishops
 	void generateBishopMoves(
 		unsigned char row,
 		unsigned char col,
@@ -140,6 +151,7 @@ private:
 		unsigned char kingCol
 	);
 
+	// generates moves for knights
 	void generateKnightMoves(
 		unsigned char row,
 		unsigned char col,
@@ -149,6 +161,7 @@ private:
 		unsigned char kingCol
 	);
 
+	// generates moves for rooks
 	void generateRookMoves(
 		unsigned char row,
 		unsigned char col,
@@ -158,6 +171,7 @@ private:
 		unsigned char kingCol
 	);
 
+	// generates moves for pawns
 	void generatePawnMoves(
 		unsigned char row,
 		unsigned char col,
