@@ -1,17 +1,18 @@
+#include <iostream>
+#include <string>
 #include "Position.h"
 
-#define starting_position "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
 int main() {
-	Position currentPos = Position(starting_position);
-	currentPos.printLayout();
-	currentPos.generateLegalMoves();
-	long startTime = System.nanoTime();
-	currentPos.think(depthThreshold, 4, true);
-	System.out.println();
-	System.out.println();
-	System.out.println("Final Evaluation: " + currentPos.bestEval);
-	System.out.println("Best Move: " + currentPos.translateMove(currentPos.bestMove));
-	long endTime = System.nanoTime();
-	System.out.println("Time Elapsed: " + ((endTime - startTime) / 1000000000.0) + " seconds");
+	clock_t start;
+	double duration;
+	start = clock();
+
+	//Position pos = Position::StartingPosition();
+	Position pos = Position("r3k2r/1bpq3p/1p1p4/pQ1Pp1p1/P3Pp2/1PP2P2/5BPP/R3K2R b KQkq - 1 19");
+	pos.legalMoves();
+	pos.printBoard();
+	cout << pos.FEN() << endl;
+
+	duration = (double(clock()) - start) / (double)CLOCKS_PER_SEC;
+	cout << "Time Elapsed: " << duration << '\n';
 }
