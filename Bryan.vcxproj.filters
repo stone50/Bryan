@@ -21,9 +21,18 @@
     <ClCompile Include="Position.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Position.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Bryan.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Evaluation.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -76,7 +76,7 @@ string Position::FEN() {
 	out += whiteMove ? "w" : "b";
 
 	// adds the castle moves, en passant move, fifty move rule counter and overall move counter
-	out += " " + castle + " " + ep + " " + to_string(fiftyMoveRule) +" " + to_string(moveCount);
+	out += " " + castle + " " + ep + " " + to_string(fiftyMoveRule) + " " + to_string(moveCount);
 	return out;
 }
 
@@ -395,7 +395,7 @@ vector<string> Position::legalMoves() {
 				!kingDangerSquares.count(rowColToChar(kingRow, kingColAndDoubleDirection)) &&
 				board[kingRow][kingColAndDirection] == '-' &&
 				board[kingRow][kingColAndDoubleDirection] == '-'
-				) {
+			) {
 				moves.push_back("O-O");
 			}
 		}
@@ -408,8 +408,8 @@ vector<string> Position::legalMoves() {
 				!kingDangerSquares.count(rowColToChar(kingRow, kingColAndDoubleDirection)) &&
 				board[kingRow][kingColAndDirection] == '-' &&
 				board[kingRow][kingColAndDoubleDirection] == '-'
-				) {
-				moves.push_back("O-O");
+			) {
+				moves.push_back("O-O-O");
 			}
 		}
 	}
@@ -421,23 +421,39 @@ vector<string> Position::legalMoves() {
 
 // prints the board to the console
 void Position::printBoard() {
-	cout << "\n-------------------\n";
+	cout << "\n  -------------------\n";
 	for (unsigned char row = 0; row < 8; row++) {
-		cout << "| ";
+		cout << 8 - row << " | ";
 		for (unsigned char col = 0; col < 8; col++) {
 			cout << board[row][col] << " ";
 		}
 		cout << "|\n";
 	}
-	cout << "-------------------\n\n";
+	cout << "  -------------------\n    a b c d e f g h\n\n";
 }
 
 // returns a string representing a move that is more readable for humans
 string Position::translateMove(string move) {
-	string out = "";
-	for (unsigned char i = 0; i < move.size(); i++) {
-		out += to_string(move.at(i));
+	if (move == "O-O" || move == "O-O-O") {
+		return move;
 	}
+	string out = "";
+	out += (move.at(0) % 8) + 97;
+	out += to_string(8 - (move.at(0) / 8));
+	out += '-';
+	out += (move.at(1) % 8) + 97;
+	out += to_string(8 - (move.at(1) / 8));
+
+	if (move.length() == 3) {
+		if (move.at(2) == 'e') {
+			out += " ep";
+		}
+		else {
+			out += '=';
+			out += move.at(2);
+		}
+	}
+
 	return out;
 }
 
@@ -455,25 +471,21 @@ void Position::kingAttack(
 		unsigned char rowBottom = row + 1;
 		if (col == 0) {
 			unsigned char colRight = col + 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colRight));
+			kingDangerSquares->insert(rowColToChar(row, colRight));
 			kingDangerSquares->insert(rowColToChar(rowBottom, col));
 			kingDangerSquares->insert(rowColToChar(rowBottom, colRight));
 		}
 		else if (col == 7) {
 			unsigned char colLeft = col - 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(row, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowBottom, col));
 			kingDangerSquares->insert(rowColToChar(rowBottom, colLeft));
 		}
 		else {
 			unsigned char colRight = col + 1;
 			unsigned char colLeft = col - 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colRight));
-			kingDangerSquares->insert(rowColToChar(
-				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(row, colRight));
+			kingDangerSquares->insert(rowColToChar(row, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowBottom, col));
 			kingDangerSquares->insert(rowColToChar(rowBottom, colRight));
 			kingDangerSquares->insert(rowColToChar(rowBottom, colLeft));
@@ -483,25 +495,21 @@ void Position::kingAttack(
 		unsigned char rowTop = row - 1;
 		if (col == 0) {
 			unsigned char colRight = col + 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colRight));
+			kingDangerSquares->insert(rowColToChar(row, colRight));
 			kingDangerSquares->insert(rowColToChar(rowTop, col));
 			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
 		}
 		else if (col == 7) {
 			unsigned char colLeft = col - 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(row, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowTop, col));
 			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
 		}
 		else {
 			unsigned char colRight = col + 1;
 			unsigned char colLeft = col - 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colRight));
-			kingDangerSquares->insert(rowColToChar(
-				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(row, colRight));
+			kingDangerSquares->insert(rowColToChar(row, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowTop, col));
 			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
 			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
@@ -512,8 +520,7 @@ void Position::kingAttack(
 		unsigned char rowBottom = row + 1;
 		if (col == 0) {
 			unsigned char colRight = col + 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colRight));
+			kingDangerSquares->insert(rowColToChar(row, colRight));
 			kingDangerSquares->insert(rowColToChar(rowTop, col));
 			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
 			kingDangerSquares->insert(rowColToChar(rowBottom, col));
@@ -521,8 +528,7 @@ void Position::kingAttack(
 		}
 		else if (col == 7) {
 			unsigned char colLeft = col - 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(row, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowTop, col));
 			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowBottom, col));
@@ -531,10 +537,8 @@ void Position::kingAttack(
 		else {
 			unsigned char colRight = col + 1;
 			unsigned char colLeft = col - 1;
-			kingDangerSquares->insert(rowColToChar(
-				row, colRight));
-			kingDangerSquares->insert(rowColToChar(
-				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(row, colRight));
+			kingDangerSquares->insert(rowColToChar(row, colLeft));
 			kingDangerSquares->insert(rowColToChar(rowTop, col));
 			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
 			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
@@ -554,10 +558,8 @@ void Position::bishopAttack(
 	unordered_set<unsigned char>* kingDangerSquares,
 	unordered_set<unsigned char>* pinnedPieces
 ) {
-	unsigned char topLeftMax = min(
-				row, col);
-	unsigned char topRightMax = min(
-				row, unsigned char(7 - col));
+	unsigned char topLeftMax = min(row, col);
+	unsigned char topRightMax = min(row, unsigned char(7 - col));
 	unsigned char bottomRightMax = min(unsigned char(7 - row), unsigned char(7 - col));
 	unsigned char bottomLeftMax = min(unsigned char(7 - row), col);
 	unsigned char pin = 64;
@@ -655,7 +657,8 @@ void Position::knightAttack(
 						1,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -663,7 +666,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 0 | col = 1
@@ -675,7 +679,8 @@ void Position::knightAttack(
 						0,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -683,7 +688,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -691,7 +697,8 @@ void Position::knightAttack(
 						3,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 			else if (col >= 6) {
@@ -705,7 +712,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -713,7 +721,8 @@ void Position::knightAttack(
 						6,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 0 | col = 6
@@ -725,7 +734,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -733,7 +743,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -741,7 +752,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 
@@ -754,7 +766,8 @@ void Position::knightAttack(
 					col - 2,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -762,7 +775,8 @@ void Position::knightAttack(
 					col - 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -770,7 +784,8 @@ void Position::knightAttack(
 					col + 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -778,7 +793,8 @@ void Position::knightAttack(
 					col + 2,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 		}
 		else {
@@ -793,7 +809,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -801,7 +818,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -809,7 +827,8 @@ void Position::knightAttack(
 						1,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 1 | col = 1
@@ -821,7 +840,8 @@ void Position::knightAttack(
 						3,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -829,7 +849,8 @@ void Position::knightAttack(
 						3,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -837,7 +858,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -845,7 +867,8 @@ void Position::knightAttack(
 						0,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 			else if (col >= 6) {
@@ -859,7 +882,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -867,14 +891,16 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					); nonSliderAttack(
+						kingDangerSquares
+					); nonSliderAttack(
 						row,
 						col,
 						3,
 						6,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 1 | col = 6
@@ -886,7 +912,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -894,7 +921,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -902,7 +930,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -910,7 +939,8 @@ void Position::knightAttack(
 						7,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 
@@ -928,7 +958,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -936,7 +967,8 @@ void Position::knightAttack(
 					col - 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -944,7 +976,8 @@ void Position::knightAttack(
 					col + 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -952,7 +985,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -960,7 +994,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -968,7 +1003,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 		}
 	}
@@ -985,14 +1021,16 @@ void Position::knightAttack(
 						1,
 						check,
 						doubleCheck,
-						kingDangerSquares					); nonSliderAttack(
+						kingDangerSquares
+					); nonSliderAttack(
 						row,
 						col,
 						6,
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 7 | col = 1
@@ -1004,7 +1042,8 @@ void Position::knightAttack(
 						0,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1012,7 +1051,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1020,7 +1060,8 @@ void Position::knightAttack(
 						3,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 			else if (col >= 6) {
@@ -1034,7 +1075,8 @@ void Position::knightAttack(
 						6,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1042,7 +1084,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 7 | col = 6
@@ -1054,7 +1097,8 @@ void Position::knightAttack(
 						7,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1062,7 +1106,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1070,7 +1115,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 
@@ -1085,7 +1131,8 @@ void Position::knightAttack(
 					col - 2,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1093,7 +1140,8 @@ void Position::knightAttack(
 					col - 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1101,7 +1149,8 @@ void Position::knightAttack(
 					col + 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1109,7 +1158,8 @@ void Position::knightAttack(
 					col + 2,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 		}
 		else {
@@ -1124,7 +1174,8 @@ void Position::knightAttack(
 						1,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1132,7 +1183,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1140,7 +1192,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 6 | col = 1
@@ -1152,7 +1205,8 @@ void Position::knightAttack(
 						0,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1160,7 +1214,8 @@ void Position::knightAttack(
 						2,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1168,7 +1223,8 @@ void Position::knightAttack(
 						3,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1176,7 +1232,8 @@ void Position::knightAttack(
 						3,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 			else if (col >= 6) {
@@ -1190,7 +1247,8 @@ void Position::knightAttack(
 						6,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1198,7 +1256,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1206,7 +1265,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 
 				// row = 6 | col = 6
@@ -1218,7 +1278,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1226,7 +1287,8 @@ void Position::knightAttack(
 						5,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1234,7 +1296,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 					nonSliderAttack(
 						row,
 						col,
@@ -1242,7 +1305,8 @@ void Position::knightAttack(
 						4,
 						check,
 						doubleCheck,
-						kingDangerSquares					);
+						kingDangerSquares
+					);
 				}
 			}
 
@@ -1260,7 +1324,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1268,7 +1333,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1276,7 +1342,8 @@ void Position::knightAttack(
 					col - 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1284,7 +1351,8 @@ void Position::knightAttack(
 					col + 1,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1292,7 +1360,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1300,7 +1369,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 		}
 	}
@@ -1318,7 +1388,8 @@ void Position::knightAttack(
 					rightOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1326,7 +1397,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1334,7 +1406,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1342,7 +1415,8 @@ void Position::knightAttack(
 					rightOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 
 			// 1 < row < 6 | col = 1
@@ -1359,7 +1433,8 @@ void Position::knightAttack(
 					leftOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1367,7 +1442,8 @@ void Position::knightAttack(
 					rightOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1375,7 +1451,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1383,7 +1460,8 @@ void Position::knightAttack(
 					rightTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1391,7 +1469,8 @@ void Position::knightAttack(
 					rightOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1399,7 +1478,8 @@ void Position::knightAttack(
 					leftOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 		}
 		else if (col >= 6) {
@@ -1415,7 +1495,8 @@ void Position::knightAttack(
 					leftOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1423,7 +1504,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1431,7 +1513,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1439,7 +1522,8 @@ void Position::knightAttack(
 					leftOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 
 			// 1 < row < 6 | col = 6
@@ -1456,7 +1540,8 @@ void Position::knightAttack(
 					rightOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1464,7 +1549,8 @@ void Position::knightAttack(
 					leftOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1472,7 +1558,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1480,7 +1567,8 @@ void Position::knightAttack(
 					leftTwo,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1488,7 +1576,8 @@ void Position::knightAttack(
 					leftOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 				nonSliderAttack(
 					row,
 					col,
@@ -1496,7 +1585,8 @@ void Position::knightAttack(
 					rightOne,
 					check,
 					doubleCheck,
-					kingDangerSquares				);
+					kingDangerSquares
+				);
 			}
 		}
 
@@ -1517,7 +1607,8 @@ void Position::knightAttack(
 				leftOne,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1525,7 +1616,8 @@ void Position::knightAttack(
 				rightOne,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1533,7 +1625,8 @@ void Position::knightAttack(
 				rightTwo,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1541,7 +1634,8 @@ void Position::knightAttack(
 				rightTwo,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1549,7 +1643,8 @@ void Position::knightAttack(
 				rightOne,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1557,7 +1652,8 @@ void Position::knightAttack(
 				leftOne,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1565,7 +1661,8 @@ void Position::knightAttack(
 				leftTwo,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 			nonSliderAttack(
 				row,
 				col,
@@ -1573,7 +1670,8 @@ void Position::knightAttack(
 				leftTwo,
 				check,
 				doubleCheck,
-				kingDangerSquares			);
+				kingDangerSquares
+			);
 		}
 	}
 }
@@ -1813,10 +1911,8 @@ bool Position::generateMove(
 	}
 
 	string move = "";
-	move += startRow;
-	move += startCol;
-	move += endRow;
-	move += endCol;
+	move += rowColToChar(startRow, startCol);
+	move += rowColToChar(endRow, endCol);
 
 	if (promote != '-') {
 		move += promote;
@@ -1839,17 +1935,15 @@ bool Position::generateKingMove(
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
 	if (
-		kingDangerSquares->count((endRow * 8) + endCol) ||
+		kingDangerSquares->count(rowColToChar(endRow, endCol)) ||
 		(whiteMove ? isupper(board[endRow][endCol]) : islower(board[endRow][endCol]))
 	) {
 		return false;
 	}
 
 	string move = "";
-	move += startRow;
-	move += startCol;
-	move += endRow;
-	move += endCol;
+	move += rowColToChar(startRow, startCol);
+	move += rowColToChar(endRow, endCol);
 
 	moves->push_back(move);
 	return true;
@@ -2233,10 +2327,8 @@ void Position::generateBishopMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
-	unsigned char topLeftMax = min(
-				row, col);
-	unsigned char topRightMax = min(
-				row, unsigned char(7 - col));
+	unsigned char topLeftMax = min(row, col);
+	unsigned char topRightMax = min(row, unsigned char(7 - col));
 	unsigned char bottomRightMax = min(unsigned char(7 - row), unsigned char(7 - col));
 	unsigned char bottomLeftMax = min(unsigned char(7 - row), col);
 
@@ -2329,7 +2421,7 @@ void Position::generateBishopMoves(
 	}
 }
 
-// generates moves for knights=====restructure
+// generates moves for knights
 void Position::generateKnightMoves(
 	unsigned char row,
 	unsigned char col,
