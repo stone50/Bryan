@@ -1,18 +1,21 @@
 #include <iostream>
 #include <string>
+#include <chrono>
 #include "Position.h"
 
 int main() {
-	clock_t start;
-	double duration;
-	start = clock();
+	Position pos = Position::StartingPosition();
+	
+	auto start = chrono::high_resolution_clock::now();
+	
+	vector<string> moves = pos.legalMoves();
 
-	//Position pos = Position::StartingPosition();
-	Position pos = Position("r3k2r/1bpq3p/1p1p4/pQ1Pp1p1/P3Pp2/1PP2P2/5BPP/R3K2R b KQkq - 1 19");
-	pos.legalMoves();
+	auto finish = chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(finish - start);
+	auto seconds = duration.count() / 1000000.0;
+
+	cout << "Legal Moves: " << moves.size() << endl;
 	pos.printBoard();
-	cout << pos.FEN() << endl;
-
-	duration = (double(clock()) - start) / (double)CLOCKS_PER_SEC;
-	cout << "Time Elapsed: " << duration << '\n';
+	cout << "Seconds Elapsed: " << seconds << endl;
+	cout << "Nodes Per Second: " << moves.size() / seconds << endl;
 }

@@ -8,6 +8,9 @@ using namespace std;
 
 class Position {
 public:
+
+#pragma region variables
+
 	char board[8][8] = {				// layout of pieces represented in a 2d array
 		{'-', '-', '-', '-', '-', '-', '-', '-'},
 		{'-', '-', '-', '-', '-', '-', '-', '-'},
@@ -24,19 +27,25 @@ public:
 	unsigned char fiftyMoveRule = 0;	// counting the number of moves without a pawn move or a capture
 	unsigned short int moveCount = 1;	// move number
 
+#pragma endregion
+
 #pragma region constructors
 
+	// constructs a position with default attributes
 	Position();
 
+	// constructs a position based on an FEN
 	Position(string FEN);
 
+	// constructs a position based on the given info
 	Position(char tboard[8][8], bool twhiteMove, string tcastle, string tep, unsigned char tfiftyMoveRule, unsigned short int tmoveCount);
 
 #pragma endregion
 
-	static Position StartingPosition();
-
 #pragma region general functions
+
+	// returns a Position with the starting position
+	static Position StartingPosition();
 
 	// generates an FEN based on the board position
 	string FEN();
@@ -44,11 +53,14 @@ public:
 	// creates a board position based on the FEN
 	void setToFEN(string FEN);
 
-	// calculates a list of legal moves
+	// returns a list of legal moves
 	vector<string> legalMoves();
 	
 	// prints the board to the console
 	void printBoard();
+
+	// returns a string representing a move that is more readable for humans
+	static string translateMove(string move);
 
 #pragma endregion
 
@@ -141,6 +153,25 @@ private:
 		bool ep = false
 	);
 
+	// generates a string that represents a move and adds it to the moves vector
+	// returns false if the move is not valid
+	bool generateKingMove(
+		unsigned char startRow,
+		unsigned char startCol,
+		unsigned char endRow,
+		unsigned char endCol,
+		vector<string>* moves,
+		unordered_set<unsigned char>* kingDangerSquares
+	);
+
+	// generates moves for king
+	void generateKingMoves(
+		unsigned char row,
+		unsigned char col,
+		vector<string>* moves,
+		unordered_set<unsigned char>* kingDangerSquares
+	);
+
 	// generates moves for bishops
 	void generateBishopMoves(
 		unsigned char row,
@@ -181,7 +212,28 @@ private:
 		unsigned char kingCol
 	);
 
-	string translateMove(string move);
+	// returns true if all 3 points are on the same line
+	bool onLine(
+		unsigned char anchorRow,
+		unsigned char anchorCol,
+		unsigned char pointOneRow,
+		unsigned char pointOneCol,
+		unsigned char pointTwoRow,
+		unsigned char pointTwoCol
+	);
+
+	// returns true if the number is strictly between lower and upper
+	bool isBetween(
+		unsigned char number,
+		unsigned char lower,
+		unsigned char upper
+	);
+
+	// returns a char representing a square on the board
+	unsigned char rowColToChar(
+		unsigned char row,
+		unsigned char col
+	);
 
 #pragma endregion
 };

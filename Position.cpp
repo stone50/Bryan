@@ -5,12 +5,15 @@ using namespace std;
 
 #pragma region constructors
 
+// constructs a position with default attributes
 Position::Position() {}
 
+// constructs a position based on an FEN
 Position::Position(string FEN) {
 	setToFEN(FEN);
 }
 
+// constructs a position based on the given info
 Position::Position(
 	char tboard[8][8],
 	bool twhiteMove,
@@ -34,12 +37,14 @@ Position::Position(
 
 #pragma endregion
 
+#pragma region general functions
+
+// returns a Position with the starting position
 Position Position::StartingPosition() {
 	return Position("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
-#pragma region general functions
-
+// generates an FEN based on the board position
 string Position::FEN() {
 
 	// adds the piece layout
@@ -75,6 +80,7 @@ string Position::FEN() {
 	return out;
 }
 
+// creates a board position based on the FEN
 void Position::setToFEN(string FEN) {
 	unsigned char row = 0;
 	unsigned char col = 0;
@@ -135,17 +141,18 @@ void Position::setToFEN(string FEN) {
 	moveCount = stoi(FEN.substr(count, FEN.length()));
 }
 
+// returns a list of legal moves
 vector<string> Position::legalMoves() {
 	vector<string> moves;
 	unsigned char check = 64;
 	bool doubleCheck = false;
 	unsigned char kingRow;
 	unsigned char kingCol;
+	unordered_set<unsigned char> kingDangerSquares;
+	unordered_set<unsigned char> pinnedPieces;
 
 #pragma region generate attacked squares
 
-	unordered_set<unsigned char> kingDangerSquares;
-	unordered_set<unsigned char> pinnedPieces;
 	for (unsigned char row = 0; row < 8; row++) {
 		for (unsigned char col = 0; col < 8; col++) {
 			char currentPiece = board[row][col];
@@ -224,146 +231,16 @@ vector<string> Position::legalMoves() {
 	}
 
 #pragma endregion
-
-#pragma region generate king moves
-
-	if (
-		kingRow >= 1 &&
-		(whiteMove ? !isupper(board[kingRow - 1][kingCol]) : !islower(board[kingRow - 1][kingCol])) &&
-		kingDangerSquares.count(((kingRow - 1) * 8) + kingCol) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow - 1,
-			kingCol,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingRow <= 6 &&
-		(whiteMove ? !isupper(board[kingRow + 1][kingCol]) : !islower(board[kingRow + 1][kingCol])) &&
-		kingDangerSquares.count(((kingRow + 1) * 8) + kingCol) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow + 1,
-			kingCol,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingCol <= 6 &&
-		(whiteMove ? !isupper(board[kingRow][kingCol + 1]) : !islower(board[kingRow][kingCol + 1])) &&
-		kingDangerSquares.count((kingRow * 8) + kingCol + 1) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow,
-			kingCol + 1,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingCol >= 1 &&
-		(whiteMove ? !isupper(board[kingRow][kingCol - 1]) : !islower(board[kingRow][kingCol - 1])) &&
-		kingDangerSquares.count((kingRow * 8) + kingCol - 1) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow,
-			kingCol - 1,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingRow >= 1 &&
-		kingCol <= 6 &&
-		(whiteMove ? !isupper(board[kingRow - 1][kingCol + 1]) : !islower(board[kingRow - 1][kingCol + 1])) &&
-		kingDangerSquares.count(((kingRow - 1) * 8) + kingCol + 1) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow - 1,
-			kingCol + 1,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingRow >= 1 &&
-		kingCol >= 1 &&
-		(whiteMove ? !isupper(board[kingRow - 1][kingCol - 1]) : !islower(board[kingRow - 1][kingCol - 1])) &&
-		kingDangerSquares.count(((kingRow - 1) * 8) + kingCol - 1) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow - 1,
-			kingCol - 1,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingRow <= 6 &&
-		kingCol <= 6 &&
-		(whiteMove ? !isupper(board[kingRow + 1][kingCol + 1]) : !islower(board[kingRow + 1][kingCol + 1])) &&
-		kingDangerSquares.count(((kingRow + 1) * 8) + kingCol + 1) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow + 1,
-			kingCol + 1,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-	if (
-		kingRow <= 6 &&
-		kingCol >= 1 &&
-		(whiteMove ? !isupper(board[kingRow + 1][kingCol - 1]) : !islower(board[kingRow + 1][kingCol - 1])) &&
-		kingDangerSquares.count(((kingRow + 1) * 8) + kingCol - 1) == 0
-	) {
-		generateMove(
-			kingRow,
-			kingCol,
-			kingRow + 1,
-			kingCol - 1,
-			&moves,
-			&pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-
-#pragma endregion
+	
+	generateKingMoves(
+		kingRow,
+		kingCol,
+		&moves,
+		&kingDangerSquares
+	);
 
 	if (doubleCheck) {
-		//return moves;
+		return moves;
 	}
 
 	vector<string> pseudoLegalMoves;
@@ -440,39 +317,109 @@ vector<string> Position::legalMoves() {
 
 #pragma endregion
 
+#pragma region add correct pseudo legal moves to moves
+
 	if (check < 64) {
 		unsigned char attackerRow = check / 8;
 		unsigned char attackerCol = check % 8;
-		if (board[attackerRow][attackerCol] != (whiteMove ? 'n' : 'N')) {
-				//check if attacker can be blocked
-				//notes:
-				//pinned pieces cannot block check
-				//en passant cannot block check
-				//account for pawns moving 2 squares on their first move
-
+		char attacker = board[attackerRow][attackerCol];
+		if (
+			attacker != (whiteMove ? 'n' : 'N') &&
+			(abs(attackerRow - kingRow) >= 2 || abs(attackerCol - kingCol) >= 2)
+		) {
+				// check if attacker can be blocked
+				// notes:
+				// pinned pieces cannot block check
+				// en passant cannot block check
+			for (unsigned char i = 0; i < pseudoLegalMoves.size(); i++) {
+				string move = pseudoLegalMoves.at(i);
+				unsigned char endMoveRow = move.at(2);
+				unsigned char endMoveCol = move.at(3);
+				unsigned char minRow = min(kingRow, attackerRow);
+				unsigned char minCol = min(kingCol, attackerCol);
+				unsigned char maxRow = max(kingRow, attackerRow);
+				unsigned char maxCol = max(kingCol, attackerCol);
+				if (
+					onLine(
+						kingRow,
+						kingCol,
+						attackerRow,
+						attackerCol,
+						endMoveRow,
+						endMoveCol
+					) &&
+					(isBetween(endMoveRow, minRow, maxRow) || isBetween(endMoveCol, minCol, maxCol))
+				) {
+					moves.push_back(move);
+				}
+			}
 		}
 
-		//check if attacker can be captured
-		//notes:
-		//en passant is accounted for in pseudo legal move generation
-		//
+		// check if attacker can be captured
+		for (unsigned char i = 0; i < pseudoLegalMoves.size(); i++) {
+			string move = pseudoLegalMoves.at(i);
+			unsigned char endMoveRow = move.at(2);
+			unsigned char endMoveCol = move.at(3);
+			if (endMoveCol == attackerCol) {
+
+				if (move.length() == 5 && move.at(4) == 'e') {
+
+					// en passant
+					if (
+						56 - ep.at(1) + (whiteMove ? 1 : -1) == attackerRow &&
+						ep.at(0) - 97 == attackerCol
+					) {
+						moves.push_back(move);
+					}
+				}
+				else if (endMoveRow == attackerRow) {
+					moves.push_back(move);
+				}
+			}
+		}
 	}
 	else {
-
+		moves.insert(moves.end(), pseudoLegalMoves.begin(), pseudoLegalMoves.end());
 	}
 
-	for (int i = 0; i < pseudoLegalMoves.size(); i++) {
-		moves.push_back(pseudoLegalMoves.at(i));
+#pragma endregion
+
+#pragma region castle
+	if (check == 64) {
+		if (castle.find(whiteMove ? 'K' : 'k') != string::npos) {
+			signed char direction = whiteMove ? 1 : -1;
+			unsigned char kingColAndDirection = kingCol + direction;
+			unsigned char kingColAndDoubleDirection = kingColAndDirection + direction;
+			if (
+				!kingDangerSquares.count(rowColToChar(kingRow, kingColAndDirection)) &&
+				!kingDangerSquares.count(rowColToChar(kingRow, kingColAndDoubleDirection)) &&
+				board[kingRow][kingColAndDirection] == '-' &&
+				board[kingRow][kingColAndDoubleDirection] == '-'
+				) {
+				moves.push_back("O-O");
+			}
+		}
+		if (castle.find(whiteMove ? 'Q' : 'q') != string::npos) {
+			signed char direction = whiteMove ? -1 : 1;
+			unsigned char kingColAndDirection = kingCol + direction;
+			unsigned char kingColAndDoubleDirection = kingColAndDirection + direction;
+			if (
+				!kingDangerSquares.count(rowColToChar(kingRow, kingColAndDirection)) &&
+				!kingDangerSquares.count(rowColToChar(kingRow, kingColAndDoubleDirection)) &&
+				board[kingRow][kingColAndDirection] == '-' &&
+				board[kingRow][kingColAndDoubleDirection] == '-'
+				) {
+				moves.push_back("O-O");
+			}
+		}
 	}
 
-	cout << "Possible moves:\n";
-	for (unsigned int i = 0; i < moves.size(); i++) {
-		cout << translateMove(moves.at(i)) << endl;
-	}
+#pragma endregion
 
 	return moves;
 }
 
+// prints the board to the console
 void Position::printBoard() {
 	cout << "\n-------------------\n";
 	for (unsigned char row = 0; row < 8; row++) {
@@ -485,6 +432,15 @@ void Position::printBoard() {
 	cout << "-------------------\n\n";
 }
 
+// returns a string representing a move that is more readable for humans
+string Position::translateMove(string move) {
+	string out = "";
+	for (unsigned char i = 0; i < move.size(); i++) {
+		out += to_string(move.at(i));
+	}
+	return out;
+}
+
 #pragma endregion
 
 #pragma region helper functions
@@ -495,44 +451,97 @@ void Position::kingAttack(
 	unsigned char col,
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
-	// attack square up
-	if (row >= 1) {
-		kingDangerSquares->insert(((row - 1) * 8) + col);
+	if (row == 0) {
+		unsigned char rowBottom = row + 1;
+		if (col == 0) {
+			unsigned char colRight = col + 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colRight));
+			kingDangerSquares->insert(rowColToChar(rowBottom, col));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colRight));
+		}
+		else if (col == 7) {
+			unsigned char colLeft = col - 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowBottom, col));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colLeft));
+		}
+		else {
+			unsigned char colRight = col + 1;
+			unsigned char colLeft = col - 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colRight));
+			kingDangerSquares->insert(rowColToChar(
+				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowBottom, col));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colRight));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colLeft));
+		}
 	}
-
-	// attack square down
-	if (row <= 6) {
-		kingDangerSquares->insert(((row + 1) * 8) + col);
+	else if (row == 7) {
+		unsigned char rowTop = row - 1;
+		if (col == 0) {
+			unsigned char colRight = col + 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colRight));
+			kingDangerSquares->insert(rowColToChar(rowTop, col));
+			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
+		}
+		else if (col == 7) {
+			unsigned char colLeft = col - 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowTop, col));
+			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
+		}
+		else {
+			unsigned char colRight = col + 1;
+			unsigned char colLeft = col - 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colRight));
+			kingDangerSquares->insert(rowColToChar(
+				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowTop, col));
+			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
+			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
+		}
 	}
-
-	// attack square right
-	if (col <= 6) {
-		kingDangerSquares->insert((row * 8) + col + 1);
-	}
-
-	// attack square left
-	if (col >= 1) {
-		kingDangerSquares->insert((row * 8) + col - 1);
-	}
-
-	// attack square up and right
-	if (row >= 1 && col <= 6) {
-		kingDangerSquares->insert(((row - 1) * 8) + col + 1);
-	}
-
-	// attack square up and left
-	if (row >= 1 && col >= 1) {
-		kingDangerSquares->insert(((row - 1) * 8) + col - 1);
-	}
-
-	// attack square down and right
-	if (row <= 6 && col <= 6) {
-		kingDangerSquares->insert(((row + 1) * 8) + col + 1);
-	}
-
-	// attack square down and left
-	if (row <= 6 && col >= 1) {
-		kingDangerSquares->insert(((row + 1) * 8) + col - 1);
+	else {
+		unsigned char rowTop = row - 1;
+		unsigned char rowBottom = row + 1;
+		if (col == 0) {
+			unsigned char colRight = col + 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colRight));
+			kingDangerSquares->insert(rowColToChar(rowTop, col));
+			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
+			kingDangerSquares->insert(rowColToChar(rowBottom, col));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colRight));
+		}
+		else if (col == 7) {
+			unsigned char colLeft = col - 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowTop, col));
+			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowBottom, col));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colLeft));
+		}
+		else {
+			unsigned char colRight = col + 1;
+			unsigned char colLeft = col - 1;
+			kingDangerSquares->insert(rowColToChar(
+				row, colRight));
+			kingDangerSquares->insert(rowColToChar(
+				row, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowTop, col));
+			kingDangerSquares->insert(rowColToChar(rowTop, colRight));
+			kingDangerSquares->insert(rowColToChar(rowTop, colLeft));
+			kingDangerSquares->insert(rowColToChar(rowBottom, col));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colRight));
+			kingDangerSquares->insert(rowColToChar(rowBottom, colLeft));
+		}
 	}
 }
 
@@ -545,10 +554,16 @@ void Position::bishopAttack(
 	unordered_set<unsigned char>* kingDangerSquares,
 	unordered_set<unsigned char>* pinnedPieces
 ) {
+	unsigned char topLeftMax = min(
+				row, col);
+	unsigned char topRightMax = min(
+				row, unsigned char(7 - col));
+	unsigned char bottomRightMax = min(unsigned char(7 - row), unsigned char(7 - col));
+	unsigned char bottomLeftMax = min(unsigned char(7 - row), col);
 	unsigned char pin = 64;
 
 	// attack squares up and left
-	for (unsigned char topLeft = 1; row - topLeft >= 0 && col - topLeft >= 0; topLeft++) {
+	for (unsigned char topLeft = 1; topLeft <= topLeftMax; topLeft++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -566,7 +581,7 @@ void Position::bishopAttack(
 	pin = 64;
 
 	// attack squares up and right
-	for (unsigned char topRight = 1; row - topRight >= 0 && col + topRight < 8; topRight++) {
+	for (unsigned char topRight = 1; topRight <= topRightMax; topRight++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -584,7 +599,7 @@ void Position::bishopAttack(
 	pin = 64;
 
 	//attack squares down and left
-	for (unsigned char bottomLeft = 1; row + bottomLeft < 8 && col - bottomLeft >= 0; bottomLeft++) {
+	for (unsigned char bottomLeft = 1; bottomLeft <= bottomLeftMax; bottomLeft++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -602,7 +617,7 @@ void Position::bishopAttack(
 	pin = 64;
 
 	// attack squares down and right
-	for (unsigned char bottomRight = 1; row + bottomRight < 8 && col + bottomRight < 8; bottomRight++) {
+	for (unsigned char bottomRight = 1; bottomRight <= bottomRightMax; bottomRight++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -627,109 +642,939 @@ void Position::knightAttack(
 	bool* doubleCheck,
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
+	if (row <= 1) {
+		if (row == 0) {
+			if (col <= 1) {
 
-	// attack square up 2 and left 1
-	if (row >= 2 && col >= 1) {
-		nonSliderAttack(
-			row,
-			col,
-			row - 2,
-			col - 1,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
+				// row = 0 | col = 0
+				if (col == 0) {
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						1,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						1,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 0 | col = 1
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						0,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						1,
+						3,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 0 | col = 7
+				if (col == 7) {
+					nonSliderAttack(
+						row,
+						col,
+						1,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						6,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 0 | col = 6
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						1,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+
+			// row = 0 | 1 < col < 6
+			else {
+				nonSliderAttack(
+					row,
+					col,
+					1,
+					col - 2,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					2,
+					col - 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					2,
+					col + 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					1,
+					col + 2,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
+		}
+		else {
+			if (col <= 1) {
+
+				// row = 1 | col = 0
+				if (col == 0) {
+					nonSliderAttack(
+						row,
+						col,
+						0,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						3,
+						1,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 1 | col = 1
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						0,
+						3,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						3,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						3,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						3,
+						0,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 1 | col = 7
+				if (col == 7) {
+					nonSliderAttack(
+						row,
+						col,
+						0,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					); nonSliderAttack(
+						row,
+						col,
+						3,
+						6,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 1 | col = 6
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						0,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						2,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						3,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						3,
+						7,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+
+			// row = 1 | 1 < col < 6
+			else {
+				unsigned char downOne = row + 1;
+				unsigned char downTwo = row + 2;
+				unsigned char upOne = row - 1;
+				unsigned char rightTwo = col + 2;
+				unsigned char leftTwo = col - 2;
+				nonSliderAttack(
+					row,
+					col,
+					downOne,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downTwo,
+					col - 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downTwo,
+					col + 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downOne,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upOne,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upOne,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
+		}
 	}
+	else if (row >= 6) {
+		if (row == 7) {
+			if (col <= 1) {
 
-	// attack square up 2 and right 1
-	if (row >= 2 && col <= 6) {
-		nonSliderAttack(
-			row,
-			col,
-			row - 2,
-			col + 1,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
+				// row = 7 | col = 0
+				if (col == 0) {
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						1,
+						check,
+						doubleCheck,
+						kingDangerSquares					); nonSliderAttack(
+						row,
+						col,
+						6,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 7 | col = 1
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						0,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						6,
+						3,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 7 | col = 7
+				if (col == 7) {
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						6,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						6,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 7 | col = 6
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						7,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						6,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+
+			// row = 7 | 1 < col < 6
+			else {
+				unsigned char upOne = row - 1;
+				unsigned char upTwo = row - 2;
+				nonSliderAttack(
+					row,
+					col,
+					upOne,
+					col - 2,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					col - 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					col + 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upOne,
+					col + 2,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
+		}
+		else {
+			if (col <= 1) {
+
+				// row = 6 | col = 0
+				if (col == 0) {
+					nonSliderAttack(
+						row,
+						col,
+						4,
+						1,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						7,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 6 | col = 1
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						4,
+						0,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						4,
+						2,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						3,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						7,
+						3,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 6 | col = 7
+				if (col == 7) {
+					nonSliderAttack(
+						row,
+						col,
+						4,
+						6,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						7,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+
+				// row = 6 | col = 6
+				else {
+					nonSliderAttack(
+						row,
+						col,
+						7,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						4,
+						5,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						5,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+					nonSliderAttack(
+						row,
+						col,
+						7,
+						4,
+						check,
+						doubleCheck,
+						kingDangerSquares					);
+				}
+			}
+
+			// row = 6 | 1 < col < 6
+			else {
+				unsigned char upOne = row - 1;
+				unsigned char upTwo = row - 2;
+				unsigned char downOne = row + 1;
+				unsigned char rightTwo = col + 2;
+				unsigned char leftTwo = col - 2;
+				nonSliderAttack(
+					row,
+					col,
+					downOne,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upOne,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					col - 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					col + 1,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upOne,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downOne,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
+		}
 	}
+	else {
+		if (col <= 1) {
 
-	// attack square up 1 and right 2
-	if (row >= 1 && col <= 5) {
-		nonSliderAttack(
-			row,
-			col,
-			row - 1,
-			col + 2,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
-	}
+			// 1 < row < 6 | col = 0
+			if (col == 0) {
+				unsigned char rightOne = col + 1;
+				unsigned char rightTwo = col + 2;
+				nonSliderAttack(
+					row,
+					col,
+					row - 2,
+					rightOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row - 1,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row + 1,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row + 2,
+					rightOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
 
-	// attack square down 1 and right 2
-	if (row <= 6 && col <= 5) {
-		nonSliderAttack(
-			row,
-			col,
-			row + 1,
-			col + 2,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
-	}
+			// 1 < row < 6 | col = 1
+			else {
+				unsigned char leftOne = col - 1;
+				unsigned char rightOne = col + 1;
+				unsigned char rightTwo = col + 2;
+				unsigned char upTwo = row - 2;
+				unsigned char downTwo = row + 2;
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					leftOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					rightOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row - 1,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row + 1,
+					rightTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downTwo,
+					rightOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downTwo,
+					leftOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
+		}
+		else if (col >= 6) {
 
-	// attack square down 2 and right 1
-	if (row <= 5 && col <= 6) {
-		nonSliderAttack(
-			row,
-			col,
-			row + 2,
-			col + 1,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
-	}
+			// 1 < row < 6 | col = 7
+			if (col == 7) {
+				unsigned char leftOne = col - 1;
+				unsigned char leftTwo = col - 2;
+				nonSliderAttack(
+					row,
+					col,
+					row - 2,
+					leftOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row - 1,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row + 1,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row + 2,
+					leftOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
 
-	// attack square down 2 and left 1
-	if (row <= 5 && col >= 1) {
-		nonSliderAttack(
-			row,
-			col,
-			row + 2,
-			col - 1,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
-	}
+			// 1 < row < 6 | col = 6
+			else {
+				unsigned char rightOne = col + 1;
+				unsigned char leftOne = col - 1;
+				unsigned char leftTwo = col - 2;
+				unsigned char upTwo = row - 2;
+				unsigned char downTwo = row + 2;
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					rightOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					upTwo,
+					leftOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row - 1,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					row + 1,
+					leftTwo,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downTwo,
+					leftOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+				nonSliderAttack(
+					row,
+					col,
+					downTwo,
+					rightOne,
+					check,
+					doubleCheck,
+					kingDangerSquares				);
+			}
+		}
 
-	// attack square down 1 and left 2
-	if (row <= 6 && col >= 2) {
-		nonSliderAttack(
-			row,
-			col,
-			row + 1,
-			col - 2,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
-	}
-
-	// attack square up 1 and left 2
-	if (row >= 1 && col >= 2) {
-		nonSliderAttack(
-			row,
-			col,
-			row - 1,
-			col - 2,
-			check,
-			doubleCheck,
-			kingDangerSquares
-		);
+		// 1 < row < 6 | 1 < col < 6
+		else {
+			unsigned char rightOne = col + 1;
+			unsigned char rightTwo = col + 2;
+			unsigned char leftOne = col - 1;
+			unsigned char leftTwo = col - 2;
+			unsigned char upOne = row - 1;
+			unsigned char upTwo = row - 2;
+			unsigned char downOne = row + 1;
+			unsigned char downTwo = row + 2;
+			nonSliderAttack(
+				row,
+				col,
+				upTwo,
+				leftOne,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				upTwo,
+				rightOne,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				upOne,
+				rightTwo,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				downOne,
+				rightTwo,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				downTwo,
+				rightOne,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				downTwo,
+				leftOne,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				downOne,
+				leftTwo,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+			nonSliderAttack(
+				row,
+				col,
+				upOne,
+				leftTwo,
+				check,
+				doubleCheck,
+				kingDangerSquares			);
+		}
 	}
 }
 
@@ -743,9 +1588,11 @@ void Position::rookAttack(
 	unordered_set<unsigned char>* pinnedPieces
 ) {
 	unsigned char pin = 64;
+	unsigned char bottomMax = 7 - row;
+	unsigned char rightMax = 7 - col;
 
 	// attack up
-	for (unsigned char top = 1; row - top >= 0; top++) {
+	for (unsigned char top = 1; top <= row; top++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -763,7 +1610,7 @@ void Position::rookAttack(
 	pin = 64;
 
 	//attack down
-	for (unsigned char bottom = 1; row + bottom < 8; bottom++) {
+	for (unsigned char bottom = 1; bottom <= bottomMax; bottom++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -781,7 +1628,7 @@ void Position::rookAttack(
 	pin = 64;
 
 	//attack right
-	for (unsigned char right = 1; col + right < 8; right++) {
+	for (unsigned char right = 1; right <= rightMax; right++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -799,7 +1646,7 @@ void Position::rookAttack(
 	pin = 64;
 
 	// attack left
-	for (unsigned char left = 1; col - left >= 0; left++) {
+	for (unsigned char left = 1; left <= col; left++) {
 		if (sliderAttack(
 			row,
 			col,
@@ -824,14 +1671,14 @@ void Position::pawnAttack(
 	bool* doubleCheck,
 	unordered_set<unsigned char>* kingDangerSquares
 ) {
-	signed char direction = ((islower(board[row][col]) > 0) * 2) - 1;
+	unsigned char rowAndDirection = row + (whiteMove ? 1 : -1);
 
 	// attack right
 	if (col <= 6) {
 		nonSliderAttack(
 			row,
 			col,
-			row + direction,
+			rowAndDirection,
 			col + 1,
 			check,
 			doubleCheck,
@@ -844,7 +1691,7 @@ void Position::pawnAttack(
 		nonSliderAttack(
 			row,
 			col,
-			row + direction,
+			rowAndDirection,
 			col - 1,
 			check,
 			doubleCheck,
@@ -883,7 +1730,7 @@ bool Position::sliderAttack(
 	// if the attacked piece is an enemy then check for a pin
 	else {
 		if (square == '-') {
-			kingDangerSquares->insert((attackRow * 8) + attackCol);
+			kingDangerSquares->insert(rowColToChar(attackRow, attackCol));
 			return false;
 		}
 		else if (square == (whiteMove ? 'K' : 'k')) {
@@ -891,18 +1738,18 @@ bool Position::sliderAttack(
 				*doubleCheck = true;
 			}
 			else {
-				*check = (pieceRow * 8) + pieceCol;
-				kingDangerSquares->insert((attackRow * 8) + attackCol);
+				*check = rowColToChar(pieceRow, pieceCol);
+				kingDangerSquares->insert(rowColToChar(attackRow, attackCol));
 			}
 			return false;
 		}
 		else {
 			if (whiteMove ? islower(square) : isupper(square)) {
-				kingDangerSquares->insert((attackRow * 8) + attackCol);
+				kingDangerSquares->insert(rowColToChar(attackRow, attackCol));
 				return true;
 			}
 			else {
-				*pin = (attackRow * 8 + attackCol);
+				*pin = rowColToChar(attackRow, attackCol);
 				return false;
 			}
 		}
@@ -924,12 +1771,12 @@ void Position::nonSliderAttack(
 			*doubleCheck = true;
 		}
 		else {
-			*check = (pieceRow * 8) + pieceCol;
-			kingDangerSquares->insert((attackRow * 8) + attackCol);
+			*check = rowColToChar(pieceRow, pieceCol);
+			kingDangerSquares->insert(rowColToChar(attackRow, attackCol));
 		}
 	}
 	else {
-		kingDangerSquares->insert((attackRow * 8) + attackCol);
+		kingDangerSquares->insert(rowColToChar(attackRow, attackCol));
 	}
 }
 
@@ -947,23 +1794,30 @@ bool Position::generateMove(
 	char promote,
 	bool ep
 ) {
+	if (whiteMove ? isupper(board[endRow][endCol]) : islower(board[endRow][endCol])) {
+		return false;
+	}
 
 	// if a piece is pinned then it should only be able to move in a straight line towards or away from the king
-	if (pinnedPieces->count((startRow * 8) + startCol)) {
-		signed char startRowDist = startRow - kingRow;
-		signed char startColDist = startCol - kingCol;
-		signed char endRowDist = endRow - kingRow;
-		signed char endColDist = endCol - kingCol;
-
-		if (min(startRowDist, startColDist) / double(max(startRowDist, startColDist)) != min(endRowDist, endColDist) / double(max(endRowDist, endColDist))) {
+	if (pinnedPieces->count(rowColToChar(startRow, startCol))) {
+		if (board[startRow][startCol] == (whiteMove ? 'N' : 'n') || !onLine(
+			kingRow,
+			kingCol,
+			startRow,
+			startCol,
+			endRow,
+			endCol
+		)) {
 			return false;
 		}
 	}
+
 	string move = "";
 	move += startRow;
 	move += startCol;
 	move += endRow;
 	move += endCol;
+
 	if (promote != '-') {
 		move += promote;
 	}
@@ -972,6 +1826,402 @@ bool Position::generateMove(
 	}
 	moves->push_back(move);
 	return true;
+}
+
+// generates a string that represents a move and adds it to the moves vector
+// returns false if the move is not valid
+bool Position::generateKingMove(
+	unsigned char startRow,
+	unsigned char startCol,
+	unsigned char endRow,
+	unsigned char endCol,
+	vector<string>* moves,
+	unordered_set<unsigned char>* kingDangerSquares
+) {
+	if (
+		kingDangerSquares->count((endRow * 8) + endCol) ||
+		(whiteMove ? isupper(board[endRow][endCol]) : islower(board[endRow][endCol]))
+	) {
+		return false;
+	}
+
+	string move = "";
+	move += startRow;
+	move += startCol;
+	move += endRow;
+	move += endCol;
+
+	moves->push_back(move);
+	return true;
+}
+
+// generates moves for king
+void Position::generateKingMoves(
+	unsigned char row,
+	unsigned char col,
+	vector<string>* moves,
+	unordered_set<unsigned char>* kingDangerSquares
+) {
+	if (row == 0) {
+		unsigned char rowBottom = row + 1;
+		if (col == 0) {
+			unsigned char colRight = col + 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+		}
+		else if (col == 7) {
+			unsigned char colLeft = col - 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+		}
+		else {
+			unsigned char colRight = col + 1;
+			unsigned char colLeft = col - 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				row,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+		}
+	}
+	else if (row == 7) {
+		unsigned char rowTop = row - 1;
+		if (col == 0) {
+			unsigned char colRight = col + 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+		}
+		else if (col == 7) {
+			unsigned char colLeft = col - 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+		}
+		else {
+			unsigned char colRight = col + 1;
+			unsigned char colLeft = col - 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				row,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+		}
+	}
+	else {
+		unsigned char rowTop = row - 1;
+		unsigned char rowBottom = row + 1;
+		if (col == 0) {
+			unsigned char colRight = col + 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+		}
+		else if (col == 7) {
+			unsigned char colLeft = col - 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+		}
+		else {
+			unsigned char colRight = col + 1;
+			unsigned char colLeft = col - 1;
+			generateKingMove(
+				row,
+				col,
+				row,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				row,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowTop,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				col,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colRight,
+				moves,
+				kingDangerSquares
+			);
+			generateKingMove(
+				row,
+				col,
+				rowBottom,
+				colLeft,
+				moves,
+				kingDangerSquares
+			);
+		}
+	}
 }
 
 // generates moves for bishops
@@ -983,23 +2233,29 @@ void Position::generateBishopMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
+	unsigned char topLeftMax = min(
+				row, col);
+	unsigned char topRightMax = min(
+				row, unsigned char(7 - col));
+	unsigned char bottomRightMax = min(unsigned char(7 - row), unsigned char(7 - col));
+	unsigned char bottomLeftMax = min(unsigned char(7 - row), col);
 
 	// search squares up and left
-	for (unsigned char topLeft = 1; row - topLeft >= 0 && col - topLeft >= 0; topLeft++) {
-		char square = board[row - topLeft][col - topLeft];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row - topLeft,
-				col - topLeft,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char topLeft = 1; topLeft <= topLeftMax; topLeft++) {
+		unsigned char rowIndex = row - topLeft;
+		unsigned char colIndex = col - topLeft;
+		char square = board[rowIndex][colIndex];
+		if (!generateMove(
+			row,
+			col,
+			rowIndex,
+			colIndex,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1007,21 +2263,21 @@ void Position::generateBishopMoves(
 	}
 
 	// search squares up and right
-	for (unsigned char topRight = 1; row - topRight >= 0 && col + topRight < 8; topRight++) {
-		char square = board[row - topRight][col + topRight];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row - topRight,
-				col + topRight,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char topRight = 1; topRight <= topRightMax; topRight++) {
+		unsigned char rowIndex = row - topRight;
+		unsigned char colIndex = col + topRight;
+		char square = board[rowIndex][colIndex];
+		if (!generateMove(
+			row,
+			col,
+			rowIndex,
+			colIndex,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1029,21 +2285,21 @@ void Position::generateBishopMoves(
 	}
 
 	// search squares down and left
-	for (unsigned char bottomLeft = 1; row + bottomLeft < 8 && col - bottomLeft >= 0; bottomLeft++) {
-		char square = board[row + bottomLeft][col - bottomLeft];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row + bottomLeft,
-				col - bottomLeft,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char bottomLeft = 1; bottomLeft <= bottomLeftMax; bottomLeft++) {
+		unsigned char rowIndex = row + bottomLeft;
+		unsigned char colIndex = col - bottomLeft;
+		char square = board[rowIndex][colIndex];
+		if (!generateMove(
+			row,
+			col,
+			rowIndex,
+			colIndex,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1051,21 +2307,21 @@ void Position::generateBishopMoves(
 	}
 
 	//search squares down and right
-	for (unsigned char bottomRight = 1; row + bottomRight < 8 && col + bottomRight < 8; bottomRight++) {
-		char square = board[row + bottomRight][col + bottomRight];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row + bottomRight,
-				col + bottomRight,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char bottomRight = 1; bottomRight <= bottomRightMax; bottomRight++) {
+		unsigned char rowIndex = row + bottomRight;
+		unsigned char colIndex = col + bottomRight;
+		char square = board[rowIndex][colIndex];
+		if (!generateMove(
+			row,
+			col,
+			rowIndex,
+			colIndex,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1073,7 +2329,7 @@ void Position::generateBishopMoves(
 	}
 }
 
-// generates moves for knights
+// generates moves for knights=====restructure
 void Position::generateKnightMoves(
 	unsigned char row,
 	unsigned char col,
@@ -1082,149 +2338,1131 @@ void Position::generateKnightMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
+	if (row <= 1) {
+		if (row == 0) {
+			if (col <= 1) {
 
-	// check square up 2 and left 1
-	if (
-		row >= 2 &&
-		col >= 1 &&
-		!(whiteMove ? isupper(board[row - 2][col - 1]) : islower(board[row - 2][col - 1]))
-	) {
-		generateMove(
-			row,
-			col,
-			row - 2,
-			col - 1,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
+				// row = 0 | col = 0
+				if (col == 0) {
+					generateMove(
+						row,
+						col,
+						2,
+						1,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						1,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 0 | col = 1
+				else {
+					generateMove(
+						row,
+						col,
+						2,
+						0,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						1,
+						3,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 0 | col = 7
+				if (col == 7) {
+					generateMove(
+						row,
+						col,
+						1,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						6,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 0 | col = 6
+				else {
+					generateMove(
+						row,
+						col,
+						1,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+
+			// row = 0 | 1 < col < 6
+			else {
+				generateMove(
+					row,
+					col,
+					1,
+					col - 2,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					2,
+					col - 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					2,
+					col + 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					1,
+					col + 2,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
+		}
+		else {
+			if (col <= 1) {
+
+				// row = 1 | col = 0
+				if (col == 0) {
+					generateMove(
+						row,
+						col,
+						0,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						3,
+						1,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 1 | col = 1
+				else {
+					generateMove(
+						row,
+						col,
+						0,
+						3,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						3,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						3,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						3,
+						0,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 1 | col = 7
+				if (col == 7) {
+					generateMove(
+						row,
+						col,
+						0,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					); generateMove(
+						row,
+						col,
+						3,
+						6,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 1 | col = 6
+				else {
+					generateMove(
+						row,
+						col,
+						0,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						2,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						3,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						3,
+						7,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+
+			// row = 1 | 1 < col < 6
+			else {
+				unsigned char downOne = row + 1;
+				unsigned char downTwo = row + 2;
+				unsigned char upOne = row - 1;
+				unsigned char rightTwo = col + 2;
+				unsigned char leftTwo = col - 2;
+				generateMove(
+					row,
+					col,
+					downOne,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downTwo,
+					col - 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downTwo,
+					col + 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downOne,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upOne,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upOne,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
+		}
 	}
+	else if (row >= 6) {
+		if (row == 7) {
+			if (col <= 1) {
 
-	// check square up 2 and right 1
-	if (
-		row >= 2 &&
-		col <= 6 &&
-		!(whiteMove ? isupper(board[row - 2][col + 1]) : islower(board[row - 2][col + 1]))
-	) {
-		generateMove(
-			row,
-			col,
-			row - 2,
-			col + 1,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
+				// row = 7 | col = 0
+				if (col == 0) {
+					generateMove(
+						row,
+						col,
+						5,
+						1,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					); generateMove(
+						row,
+						col,
+						6,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 7 | col = 1
+				else {
+					generateMove(
+						row,
+						col,
+						5,
+						0,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						5,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						6,
+						3,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 7 | col = 7
+				if (col == 7) {
+					generateMove(
+						row,
+						col,
+						5,
+						6,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						6,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 7 | col = 6
+				else {
+					generateMove(
+						row,
+						col,
+						5,
+						7,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						5,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						6,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+
+			// row = 7 | 1 < col < 6
+			else {
+			unsigned char upOne = row - 1;
+			unsigned char upTwo = row - 2;
+				generateMove(
+					row,
+					col,
+					upOne,
+					col - 2,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upTwo,
+					col - 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upTwo,
+					col + 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upOne,
+					col + 2,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
+		}
+		else {
+			if (col <= 1) {
+
+				// row = 6 | col = 0
+				if (col == 0) {
+					generateMove(
+						row,
+						col,
+						4,
+						1,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						5,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						7,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 6 | col = 1
+				else {
+					generateMove(
+						row,
+						col,
+						4,
+						0,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						4,
+						2,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						5,
+						3,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						7,
+						3,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+			else if (col >= 6) {
+
+				// row = 6 | col = 7
+				if (col == 7) {
+					generateMove(
+						row,
+						col,
+						4,
+						6,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						5,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						7,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+
+				// row = 6 | col = 6
+				else {
+					generateMove(
+						row,
+						col,
+						7,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						4,
+						5,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						5,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+					generateMove(
+						row,
+						col,
+						7,
+						4,
+						pseudoLegalMoves,
+						pinnedPieces,
+						kingRow,
+						kingCol
+					);
+				}
+			}
+
+			// row = 6 | 1 < col < 6
+			else {
+			unsigned char upOne = row - 1;
+			unsigned char upTwo = row - 2;
+			unsigned char downOne = row + 1;
+			unsigned char rightTwo = col + 2;
+			unsigned char leftTwo = col - 2;
+				generateMove(
+					row,
+					col,
+					downOne,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upOne,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upTwo,
+					col - 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upTwo,
+					col + 1,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upOne,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downOne,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
+		}
 	}
+	else {
+		if (col <= 1) {
 
-	// check square up 1 and right 2
-	if (
-		row >= 1 &&
-		col <= 5 &&
-		!(whiteMove ? isupper(board[row - 1][col + 2]) : islower(board[row - 1][col + 2]))
-	) {
-		generateMove(
-			row,
-			col,
-			row - 1,
-			col + 2,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
+			// 1 < row < 6 | col = 0
+			if (col == 0) {
+				unsigned char rightOne = col + 1;
+				unsigned char rightTwo = col + 2;
+				generateMove(
+					row,
+					col,
+					row - 2,
+					rightOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row - 1,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row + 1,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row + 2,
+					rightOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
 
-	// check square down 1 and right 2
-	if (
-		row <= 6 &&
-		col <= 5 &&
-		!(whiteMove ? isupper(board[row + 1][col + 2]) : islower(board[row + 1][col + 2]))
-	) {
-		generateMove(
-			row,
-			col,
-			row + 1,
-			col + 2,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
+			// 1 < row < 6 | col = 1
+			else {
+				unsigned char leftOne = col - 1;
+				unsigned char rightOne = col + 1;
+				unsigned char rightTwo = col + 2;
+				unsigned char upTwo = row - 2;
+				unsigned char downTwo = row + 2;
+				generateMove(
+					row,
+					col,
+					upTwo,
+					leftOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upTwo,
+					rightOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row - 1,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row + 1,
+					rightTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downTwo,
+					rightOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downTwo,
+					leftOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
+		}
+		else if (col >= 6) {
 
-	// check square down 2 and right 1
-	if (
-		row <= 5 &&
-		col <= 6 &&
-		!(whiteMove ? isupper(board[row + 2][col + 1]) : islower(board[row + 2][col + 1]))
-	) {
-		generateMove(
-			row,
-			col,
-			row + 2,
-			col + 1,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
+			// 1 < row < 6 | col = 7
+			if (col == 7) {
+				unsigned char leftOne = col - 1;
+				unsigned char leftTwo = col - 2;
+				generateMove(
+					row,
+					col,
+					row - 2,
+					leftOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row - 1,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row + 1,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row + 2,
+					leftOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
 
-	// check square down 2 and left 1
-	if (
-		row <= 5 &&
-		col >= 1 &&
-		!(whiteMove ? isupper(board[row + 2][col - 1]) : islower(board[row + 2][col - 1]))
-	) {
-		generateMove(
-			row,
-			col,
-			row + 2,
-			col - 1,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
+			// 1 < row < 6 | col = 6
+			else {
+				unsigned char rightOne = col + 1;
+				unsigned char leftOne = col - 1;
+				unsigned char leftTwo = col - 2;
+				unsigned char upTwo = row - 2;
+				unsigned char downTwo = row + 2;
+				generateMove(
+					row,
+					col,
+					upTwo,
+					rightOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					upTwo,
+					leftOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row - 1,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					row + 1,
+					leftTwo,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downTwo,
+					leftOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+				generateMove(
+					row,
+					col,
+					downTwo,
+					rightOne,
+					pseudoLegalMoves,
+					pinnedPieces,
+					kingRow,
+					kingCol
+				);
+			}
+		}
 
-	// check square down 1 and left 2
-	if (
-		row <= 6 &&
-		col >= 2 &&
-		!(whiteMove ? isupper(board[row + 1][col - 2]) : islower(board[row + 1][col - 2]))
-	) {
-		generateMove(
-			row,
-			col,
-			row + 1,
-			col - 2,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
-	}
-
-	// check square up 1 and left 2
-	if (
-		row >= 1 &&
-		col >= 2 &&
-		!(whiteMove ? isupper(board[row - 1][col - 2]) : islower(board[row - 1][col - 2]))
-	) {
-		generateMove(
-			row,
-			col,
-			row - 1,
-			col - 2,
-			pseudoLegalMoves,
-			pinnedPieces,
-			kingRow,
-			kingCol
-		);
+		// 1 < row < 6 | 1 < col < 6
+		else {
+			unsigned char rightOne = col + 1;
+			unsigned char rightTwo = col + 2;
+			unsigned char leftOne = col - 1;
+			unsigned char leftTwo = col - 2;
+			unsigned char upOne = row - 1;
+			unsigned char upTwo = row - 2;
+			unsigned char downOne = row + 1;
+			unsigned char downTwo = row + 2;
+			generateMove(
+				row,
+				col,
+				upTwo,
+				leftOne,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				upTwo,
+				rightOne,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				upOne,
+				rightTwo,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				downOne,
+				rightTwo,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				downTwo,
+				rightOne,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				downTwo,
+				leftOne,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				downOne,
+				leftTwo,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+			generateMove(
+				row,
+				col,
+				upOne,
+				leftTwo,
+				pseudoLegalMoves,
+				pinnedPieces,
+				kingRow,
+				kingCol
+			);
+		}
 	}
 }
 
@@ -1237,23 +3475,24 @@ void Position::generateRookMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
+	unsigned char bottomMax = 7 - row;
+	unsigned char rightMax = 7 - col;
 
 	// search squares above
-	for (unsigned char top = 1; row - top >= 0; top++) {
-		char square = board[row - top][col];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row - top,
-				col,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char top = 1; top <= row; top++) {
+		unsigned char rowIndex = row - top;
+		char square = board[rowIndex][col];
+		if (!generateMove(
+			row,
+			col,
+			rowIndex,
+			col,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1261,21 +3500,20 @@ void Position::generateRookMoves(
 	}
 
 	// search squares below
-	for (unsigned char bottom = 1; row + bottom < 8; bottom++) {
-		char square = board[row + bottom][col];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row + bottom,
-				col,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char bottom = 1; bottom <= bottomMax; bottom++) {
+		unsigned char rowIndex = row + bottom;
+		char square = board[rowIndex][col];
+		if (!generateMove(
+			row,
+			col,
+			rowIndex,
+			col,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1283,21 +3521,20 @@ void Position::generateRookMoves(
 	}
 
 	// search squares to the right
-	for (unsigned char right = 1; col + right < 8; right++) {
-		char square = board[row][col + right];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row,
-				col + right,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char right = 1; right <= rightMax; right++) {
+		unsigned char colIndex = col + right;
+		char square = board[row][colIndex];
+		if (!generateMove(
+			row,
+			col,
+			row,
+			colIndex,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1305,21 +3542,20 @@ void Position::generateRookMoves(
 	}
 
 	// search squares to the left
-	for (unsigned char left = 1; col - left >= 0; left++) {
-		char square = board[row][col - left];
-		if (!(whiteMove ? isupper(square) : islower(square))) {
-			if (!generateMove(
-				row,
-				col,
-				row,
-				col - left,
-				pseudoLegalMoves,
-				pinnedPieces,
-				kingRow,
-				kingCol
-			)) {
-				break;
-			}
+	for (unsigned char left = 1; left <= col; left++) {
+		unsigned char colIndex = col - left;
+		char square = board[row][colIndex];
+		if (!generateMove(
+			row,
+			col,
+			row,
+			colIndex,
+			pseudoLegalMoves,
+			pinnedPieces,
+			kingRow,
+			kingCol
+		)) {
+			break;
 		}
 		if (square != '-') {
 			break;
@@ -1336,20 +3572,24 @@ void Position::generatePawnMoves(
 	unsigned char kingRow,
 	unsigned char kingCol
 ) {
-	signed char direction = ((islower(board[row][col]) > 0) * 2) - 1;
+	signed char direction = whiteMove ? -1 : 1;
+	unsigned char rowAndDirection = row + direction;
+	unsigned char rightCol = col + 1;
+	unsigned char leftCol = col - 1;
+	unsigned char frontSquare = board[rowAndDirection][col];
 
 	// capture right
 	if (
 		col <= 6 &&
-		(whiteMove ? islower(board[row + direction][col + 1]) : isupper(board[row + direction][col + 1]))
-		) {
+		(whiteMove ? islower(board[rowAndDirection][rightCol]) : isupper(board[rowAndDirection][rightCol]))
+	) {
 		// promotion
-		if (row + direction == (whiteMove ? 1 : 6)) {
+		if (row == (whiteMove ? 1 : 6)) {
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col + 1,
+				rowAndDirection,
+				rightCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1359,8 +3599,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col + 1,
+				rowAndDirection,
+				rightCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1370,8 +3610,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col + 1,
+				rowAndDirection,
+				rightCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1381,8 +3621,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col + 1,
+				rowAndDirection,
+				rightCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1394,8 +3634,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col + 1,
+				rowAndDirection,
+				rightCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1407,16 +3647,16 @@ void Position::generatePawnMoves(
 	// capture left
 	if (
 		col >= 1 &&
-		(whiteMove ? islower(board[row + direction][col - 1]) : isupper(board[row + direction][col - 1]))
-		) {
+		(whiteMove ? islower(board[rowAndDirection][leftCol]) : isupper(board[rowAndDirection][leftCol]))
+	) {
 
 		// promotion
-		if (row + direction == (whiteMove ? 1 : 6)) {
+		if (row == (whiteMove ? 1 : 6)) {
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col - 1,
+				rowAndDirection,
+				leftCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1426,8 +3666,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col - 1,
+				rowAndDirection,
+				leftCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1437,8 +3677,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col - 1,
+				rowAndDirection,
+				leftCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1448,8 +3688,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col - 1,
+				rowAndDirection,
+				leftCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1461,8 +3701,8 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
-				col - 1,
+				rowAndDirection,
+				leftCol,
 				pseudoLegalMoves,
 				pinnedPieces,
 				kingRow,
@@ -1472,14 +3712,14 @@ void Position::generatePawnMoves(
 	}
 
 	// normal forward move
-	if (board[row + direction][col] == '-') {
+	if (frontSquare == '-') {
 
 		// promotion
-		if (row + direction == (whiteMove ? 1 : 6)) {
+		if (row == (whiteMove ? 1 : 6)) {
 			generateMove(
 				row,
 				col,
-				row + direction,
+				rowAndDirection,
 				col,
 				pseudoLegalMoves,
 				pinnedPieces,
@@ -1490,7 +3730,7 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
+				rowAndDirection,
 				col,
 				pseudoLegalMoves,
 				pinnedPieces,
@@ -1501,7 +3741,7 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
+				rowAndDirection,
 				col,
 				pseudoLegalMoves,
 				pinnedPieces,
@@ -1512,7 +3752,7 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
+				rowAndDirection,
 				col,
 				pseudoLegalMoves,
 				pinnedPieces,
@@ -1525,7 +3765,7 @@ void Position::generatePawnMoves(
 			generateMove(
 				row,
 				col,
-				row + direction,
+				rowAndDirection,
 				col,
 				pseudoLegalMoves,
 				pinnedPieces,
@@ -1538,13 +3778,13 @@ void Position::generatePawnMoves(
 	// move 2 squares on first move
 	if (
 		row == (whiteMove ? 6 : 1) &&
-		board[row + direction][col] == '-' &&
-		board[row + direction + direction][col] == '-'
+		frontSquare == '-' &&
+		board[rowAndDirection + direction][col] == '-'
 	) {
 		generateMove(
 			row,
 			col,
-			row + direction + direction,
+			rowAndDirection + direction,
 			col,
 			pseudoLegalMoves,
 			pinnedPieces,
@@ -1555,16 +3795,14 @@ void Position::generatePawnMoves(
 
 	// en passant
 	if (ep != "-") {
-		signed char epSquare = ((56 - ep.at(1)) * 8) + (ep.at(0) - 97);
-		unsigned char epRow = 56 - ep.at(1);
 		unsigned char epCol = ep.at(0) - 97;
-		if (row + direction == epRow) {
-			if (col + 1 == epCol) {
+		if (rowAndDirection == 56 - ep.at(1)) {
+			if (rightCol == epCol) {
 				generateMove(
 					row,
 					col,
-					row + direction,
-					col + 1,
+					rowAndDirection,
+					rightCol,
 					pseudoLegalMoves,
 					pinnedPieces,
 					kingRow,
@@ -1573,12 +3811,12 @@ void Position::generatePawnMoves(
 					true
 				);
 			}
-			else if (col - 1 == epCol) {
+			else if (leftCol == epCol) {
 				generateMove(
 					row,
 					col,
-					row + direction,
-					col - 1,
+					rowAndDirection,
+					leftCol,
 					pseudoLegalMoves,
 					pinnedPieces,
 					kingRow,
@@ -1591,12 +3829,38 @@ void Position::generatePawnMoves(
 	}
 }
 
-string Position::translateMove(string move) {
-	string out = "";
-	for (unsigned char i = 0; i < move.size(); i++) {
-		out += to_string(move.at(i));
-	}
-	return out;
+// returns true if all 3 points are on the same line
+bool Position::onLine(
+	unsigned char anchorRow,
+	unsigned char anchorCol,
+	unsigned char pointOneRow,
+	unsigned char pointOneCol,
+	unsigned char pointTwoRow,
+	unsigned char pointTwoCol
+) {
+	signed char startRowDist = pointOneRow - anchorRow;
+	signed char startColDist = pointOneCol - anchorCol;
+	signed char endRowDist = pointTwoRow - anchorRow;
+	signed char endColDist = pointTwoCol - anchorCol;
+
+	return min(startRowDist, startColDist) / double(max(startRowDist, startColDist)) == min(endRowDist, endColDist) / double(max(endRowDist, endColDist));
+}
+
+// returns true if the number is strictly between lower and upper
+bool Position::isBetween(
+	unsigned char number,
+	unsigned char lower,
+	unsigned char upper
+) {
+	return (number < upper && number > lower);
+}
+
+// returns a char representing a square on the board
+unsigned char Position::rowColToChar(
+	unsigned char row,
+	unsigned char col
+) {
+	return (row * 8) + col;
 }
 
 #pragma endregion
